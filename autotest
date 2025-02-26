@@ -1,0 +1,23 @@
+#!/bin/bash
+base_dir="/home/dp1091/public_html/25T1"
+autotest_script="$base_dir/public/_infra/extern/autotest/autotest.py"
+c_check_path="$base_dir/public/_infra/extern/c_check/c_check.py"
+activities_dir="$base_dir/activities"
+
+# Add c_check to PATH
+export PATH="$PATH:$(dirname $c_check_path)"
+compiler="clang"
+if [ $# -gt 0 ]; then
+    if [ "$1" = "dcc" ] || [ "$1" = "gcc" ] || [ "$1" = "clang" ]; then
+        compiler="$1"
+        shift
+    fi
+fi
+
+# Set compiler and checker parameters
+parameters="
+    default_compilers = {'c': [['$compiler', '-Werror']]}
+    default_checkers = {'c': [['python3', '$c_check_path']]}
+"
+# Execute autotest script
+/usr/bin/python3 -I "$autotest_script" --exercise_directory "$activities_dir" --parameters "$parameters" "$@"
